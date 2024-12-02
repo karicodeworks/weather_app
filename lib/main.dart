@@ -38,14 +38,37 @@ class WeatherPageState extends State<WeatherPage> {
   String _visibility = '';
   String _windSpeed = '';
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _checkLocationPermission();
+  }
+
   getData(String cityName) async {
+    if (cityName == '') {
+      bool permissionGranted = await _checkLocationPermission();
+      if (!permissionGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('Location permission is required to fetch weather data.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+    }
+
     final weatherService = WeatherService();
     var weatherData;
 
-    if (cityName == '')
+    if (cityName == '') {
       weatherData = await weatherService.getWeatherByPosition();
-    else
+    } else {
       weatherData = await weatherService.getWeather(cityName);
+    }
+    debugPrint(weatherData.toString());
 
     setState(() {
       _cityName = weatherData['name'];
@@ -64,26 +87,37 @@ class WeatherPageState extends State<WeatherPage> {
       _visibility = weatherData['visibility'].toString();
       _windSpeed = weatherData['wind']['speed'].toString();
 
-      if (_main == 'Clear') {
+      _setWeatherImages(_main);
+    });
+  }
+
+  void _setWeatherImages(String weatherCondition) {
+    switch (weatherCondition) {
+      case 'Clear':
         _bgImg = 'assets/images/clear.jpg';
         _iconImg = 'assets/icons/clear.png';
-      } else if (_main == 'Clouds') {
+        break;
+      case 'Clouds':
         _bgImg = 'assets/images/clouds.jpg';
         _iconImg = 'assets/icons/clouds.png';
-      } else if (_main == 'Rain') {
+        break;
+      case 'Rain':
         _bgImg = 'assets/images/rain.jpg';
         _iconImg = 'assets/icons/rain.png';
-      } else if (_main == 'Fog') {
+        break;
+      case 'Fog':
         _bgImg = 'assets/images/fog.jpg';
         _iconImg = 'assets/icons/fog.png';
-      } else if (_main == 'Thunderstorm') {
-        _bgImg = 'assets/images/thunderstorm.jpeg';
+        break;
+      case 'Thunderstorm':
+        _bgImg = 'assets/images/thunderstorm.jpg';
         _iconImg = 'assets/icons/thunderstorm.png';
-      } else {
+        break;
+      default:
         _bgImg = 'assets/images/haze.jpeg';
         _iconImg = 'assets/icons/haze.png';
-      }
-    });
+        break;
+    }
   }
 
   Future<bool> _checkLocationPermission() async {

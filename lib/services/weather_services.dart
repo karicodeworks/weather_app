@@ -20,10 +20,10 @@ class WeatherService {
         LocationSettings(accuracy: LocationAccuracy.high);
     Position position =
         await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-    double lat = position.latitude, long = position.longitude;
+    double lat = position.latitude, lon = position.longitude;
 
     final response = await http.get(Uri.parse(
-        'https://api.openweathermap.org/data/2.0/weather?lat=$lat&lon=$long&appid=$apiKey&units=metric'));
+        'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric'));
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
